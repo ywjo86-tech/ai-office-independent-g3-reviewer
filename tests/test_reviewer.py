@@ -9,6 +9,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
+import yaml
 from reviewer import review_evidence, reviewer_record_digest
 
 
@@ -127,6 +128,43 @@ def _review(**overrides):
 
 
 class ReviewerTests(unittest.TestCase):
+    def test_workflow_attests_review_json_and_uploads_its_bundle(self):
+        path = Path(".github/workflows/g3-review.yml")
+        workflow = yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+        job = workflow["jobs"]["independent-review"]
+        permissions = workflow["permissions"]
+        self.assertEqual(permissions["id-token"], "write")
+        self.assertEqual(permissions["attestations"], "write")
+        self.assertEqual(permissions["artifact-metadata"], "write")
+
+        steps = {step.get("id", step.get("name")): step for step in job["steps"]}
+        attest = steps["attest-review"]
+        self.assertEqual(
+            attest["uses"],
+            "actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6",
+        )
+        self.assertEqual(attest["with"]["subject-path"], "_workspace/reviewer-output/independent-g3-review.json")
+        upload = steps["Upload review record and attestation bundle"]["with"]["path"]
+        self.assertIn("independent-g3-review.json", upload)
+        self.assertIn("independent-g3-review.attestation.json", upload)
+
+    def test_workflow_pins_actions_and_never_interpolates_dispatch_input_into_shell(self):
+        workflow = yaml.load(Path(".github/workflows/g3-review.yml").read_text(), Loader=yaml.BaseLoader)
+        job = workflow["jobs"]["independent-review"]
+        for step in job["steps"]:
+            if "uses" in step:
+                self.assertRegex(step["uses"], r"@[0-9a-f]{40}$")
+            if "run" in step:
+                self.assertNotIn("${{ inputs.", step["run"])
+        steps = {step.get("id", step.get("name")): step for step in job["steps"]}
+        download = steps["Download pre-collected evidence"]
+        self.assertEqual(download["with"]["path"], "_workspace/g3-evidence")
+        self.assertNotIn("evidence_root", workflow["on"]["workflow_dispatch"]["inputs"])
+        review = steps["Run independent read-only review"]
+        self.assertEqual(review["env"]["INPUT_G3_PATH"], "${{ inputs.g3_path }}")
+        self.assertIn('--g3 "$INPUT_G3_PATH"', review["run"])
+        self.assertEqual(review["env"]["INPUT_REPOSITORY"], "${{ github.repository }}")
+
     def test_complete_staging_bundle_produces_non_authorizing_pass(self):
         result = _review()
 
