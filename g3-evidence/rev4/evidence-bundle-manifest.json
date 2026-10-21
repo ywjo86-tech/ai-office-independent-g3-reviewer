@@ -1,0 +1,23 @@
+{
+  "evidence_bundle_sha256": "b1168e7dee1e9c624b9597acab087f6d991338280097242d9d27e0d01bd4523f",
+  "mutation_performed": false,
+  "official_issue_allowed": false,
+  "readback_sha256": "e066c135f11c83075c4d150f3981f8ee2e647a95fd7b696965b8afc55d544608",
+  "schema_version": "orchestration.g3-evidence-bundle-manifest.v1",
+  "scope": "LOCAL_READ_ONLY_STAGING_PREFLIGHT",
+  "source_sha256": {
+    "approve": {
+      "d1": "a63b498b4e67d10b46d588764a9b7ab0cc3820e61219617b00c50020c14a06f3",
+      "expected": "8003bf50e745c54e3cd77ad5d69b65cdce6a31fda919f1627de78c195602364b",
+      "kms": "141cd315d14140f36031ccc351a75874f5d8807dbf0f9bb66eabbe32c132699a",
+      "webauthn": "e7e9c7b78092cb1935f4ad9ea54c386931c14c5dfdb7a088299314bf877c6459"
+    },
+    "reject": {
+      "d1": "a7379ea7cf88a840759eb5c781d08e8c2187517708429f3d8238354b78e848ef",
+      "expected": "b67b7a3b340f54de55f85122c3eb309e377ab2692e96eaee53a2878ce2382f0b",
+      "kms": "141cd315d14140f36031ccc351a75874f5d8807dbf0f9bb66eabbe32c132699a",
+      "webauthn": "1fc83773691a9246c5b7e7f2bc7de4dda645e8946fa1f07b835bd0a2d75bdae6"
+    }
+  },
+  "status": "PREFLIGHT_PASS"
+}

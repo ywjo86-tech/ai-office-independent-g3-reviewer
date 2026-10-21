@@ -1,0 +1,9 @@
+{
+  "ceremony_id": "ceremony-98c7c3df1eeb45449743f4c59055519f",
+  "challenge_consumed": true,
+  "challenge_id": "challenge-109f0ddbd12847048527f0b9fe489199",
+  "decision": "APPROVE",
+  "origin": "https://jarvis-server.tail0ac825.ts.net:9443",
+  "owner_actor_id": "owner-ywjo",
+  "user_verification": true
+}

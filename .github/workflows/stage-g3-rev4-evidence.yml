@@ -1,0 +1,25 @@
+name: Stage isolated G3 rev4 evidence
+
+on:
+  push:
+    branches:
+      - codex/g3-rev4-evidence-stage-20261021
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout this isolated staging branch
+        uses: actions/checkout@v4
+      - name: Upload sanitized G3 rev4 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: g3-rev4-evidence
+          path: g3-evidence/rev4/
+          if-no-files-found: error
+          retention-days: 1

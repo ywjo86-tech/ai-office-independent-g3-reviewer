@@ -1,0 +1,121 @@
+{
+  "d1": {
+    "approve": {
+      "changed_db": false,
+      "rows_written": 0
+    },
+    "reject": {
+      "changed_db": false,
+      "rows_written": 0
+    }
+  },
+  "gate_id": "G3",
+  "kms": {
+    "approve": {
+      "private_key_present": false,
+      "token_present": false
+    },
+    "reject": {
+      "private_key_present": false,
+      "token_present": false
+    }
+  },
+  "mutation_performed": false,
+  "official_issue_allowed": false,
+  "project_id": "OCP-RDC-EXEC-CANARY-20260923-R2",
+  "readbacks": {
+    "approve": {
+      "activation_id": "stg-activation-active-001",
+      "algorithm": "EdDSA",
+      "approval_id": "stg-fixture-active-001",
+      "audience": "ai-office-harness",
+      "ceremony_id": "ceremony-98c7c3df1eeb45449743f4c59055519f",
+      "challenge_consumed": true,
+      "challenge_id": "challenge-109f0ddbd12847048527f0b9fe489199",
+      "decision": "APPROVE",
+      "event_hash": null,
+      "expected_version": 0,
+      "expires_at": "2026-10-22T11:03:53Z",
+      "gate_id": "G3",
+      "issued_at": "2026-10-21T11:03:53Z",
+      "issuer": "google-cloud-kms",
+      "jti": "jti-g3-active-001",
+      "key_custody": "KMS_ONLY",
+      "key_id": "gcp-kms-ed25519-staging-v1",
+      "next_version": 1,
+      "origin": "https://jarvis-server.tail0ac825.ts.net:9443",
+      "owner_actor_id": "owner-ywjo",
+      "plan_sha256": "ecb4e3e1a7f5cb6fa5d2ed058a94e6bbac250d5fc78db0a6dee66fe77203fbe7",
+      "previous_event_hash": null,
+      "project_id": "OCP-RDC-EXEC-CANARY-20260923-R2",
+      "release_digest": "144aba8e4098f2c6344435001c8ff8c2ce0a63c5d74f075f937781e40670f375",
+      "replay_nonce": "g3-replay-active-20261021",
+      "revocation_reason": null,
+      "revocation_version": 0,
+      "revoked": false,
+      "revoked_at": null,
+      "runtime_version_id": "runtime-g3-isolated-rev4-20261021-702f4d0",
+      "schema_version": "orchestration.g3-owner-approval-readback.v1",
+      "signature_valid": true,
+      "source_head": "2c97006583c90dad35c80ecc42e516cc759cf977",
+      "state_version": 1,
+      "task_id": "TASK-003",
+      "user_verification": true
+    },
+    "reject": {
+      "activation_id": "stg-activation-revoked-001",
+      "algorithm": "EdDSA",
+      "approval_id": "stg-fixture-revoked-001",
+      "audience": "ai-office-harness",
+      "ceremony_id": "ceremony-289bfa42fd90427bb7307a31d07dd0f1",
+      "challenge_consumed": true,
+      "challenge_id": "challenge-40cadc38a9ea484c9089df0f3cdf133c",
+      "decision": "REJECT",
+      "event_hash": "c0e5c97d562aab9d6e0a5a7a066f5cac6b6e6a442759c69358559e26d91d87e5",
+      "expected_version": 0,
+      "expires_at": "2026-10-22T11:03:53Z",
+      "gate_id": "G3",
+      "issued_at": "2026-10-21T11:03:53Z",
+      "issuer": "google-cloud-kms",
+      "jti": "jti-g3-revoked-001",
+      "key_custody": "KMS_ONLY",
+      "key_id": "gcp-kms-ed25519-staging-v1",
+      "next_version": 1,
+      "origin": "https://jarvis-server.tail0ac825.ts.net:9443",
+      "owner_actor_id": "owner-ywjo",
+      "plan_sha256": "ecb4e3e1a7f5cb6fa5d2ed058a94e6bbac250d5fc78db0a6dee66fe77203fbe7",
+      "previous_event_hash": null,
+      "project_id": "OCP-RDC-EXEC-CANARY-20260923-R2",
+      "release_digest": "144aba8e4098f2c6344435001c8ff8c2ce0a63c5d74f075f937781e40670f375",
+      "replay_nonce": "g3-replay-revoked-20261021",
+      "revocation_reason": "isolated staging revocation fixture",
+      "revocation_version": 1,
+      "revoked": true,
+      "revoked_at": "2026-10-18T00:00:00Z",
+      "runtime_version_id": "runtime-g3-isolated-rev4-20261021-702f4d0",
+      "schema_version": "orchestration.g3-owner-approval-readback.v1",
+      "signature_valid": true,
+      "source_head": "2c97006583c90dad35c80ecc42e516cc759cf977",
+      "state_version": 1,
+      "task_id": "TASK-003",
+      "user_verification": true
+    }
+  },
+  "schema_version": "orchestration.g3-owner-approval-readback.v1",
+  "scope": "LOCAL_READ_ONLY_STAGING_PREFLIGHT",
+  "source_sha256": {
+    "approve": {
+      "d1": "a63b498b4e67d10b46d588764a9b7ab0cc3820e61219617b00c50020c14a06f3",
+      "expected": "8003bf50e745c54e3cd77ad5d69b65cdce6a31fda919f1627de78c195602364b",
+      "kms": "141cd315d14140f36031ccc351a75874f5d8807dbf0f9bb66eabbe32c132699a",
+      "webauthn": "e7e9c7b78092cb1935f4ad9ea54c386931c14c5dfdb7a088299314bf877c6459"
+    },
+    "reject": {
+      "d1": "a7379ea7cf88a840759eb5c781d08e8c2187517708429f3d8238354b78e848ef",
+      "expected": "b67b7a3b340f54de55f85122c3eb309e377ab2692e96eaee53a2878ce2382f0b",
+      "kms": "141cd315d14140f36031ccc351a75874f5d8807dbf0f9bb66eabbe32c132699a",
+      "webauthn": "1fc83773691a9246c5b7e7f2bc7de4dda645e8946fa1f07b835bd0a2d75bdae6"
+    }
+  },
+  "status": "PREFLIGHT_PASS"
+}

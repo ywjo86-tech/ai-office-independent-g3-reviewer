@@ -1,0 +1,12 @@
+{
+  "algorithm": "EdDSA",
+  "audience": "ai-office-harness",
+  "expires_at": "2026-10-22T11:03:53Z",
+  "issued_at": "2026-10-21T11:03:53Z",
+  "issuer": "google-cloud-kms",
+  "key_custody": "KMS_ONLY",
+  "key_id": "gcp-kms-ed25519-staging-v1",
+  "private_key_present": false,
+  "signature_valid": true,
+  "token_present": false
+}

@@ -1,0 +1,241 @@
+{
+  "schema_version": "orchestration.g3-real-owner-webauthn-d1-jws-successor-contract.v1",
+  "contract_revision": 4,
+  "project_id": "OCP-RDC-EXEC-CANARY-20260923-R2",
+  "project_alias": "OCP-RDC-EXEC-CANARY-20260923-R2",
+  "gate_id": "G3",
+  "task_id": "TASK-003",
+  "lv_id": "TASK-003",
+  "objective": "REAL_OWNER_WEBAUTHN_D1_JWS",
+  "execution_mode": "FULL_PLAN_HYBRID",
+  "gate_by_gate": false,
+  "gateway_contract": {
+    "schema_version": "orchestration.gateway-identity-path.v1",
+    "execution_mode": "FULL_PLAN_HYBRID",
+    "transport": "UDS_MTLS_CF_ACCESS",
+    "endpoint": "runtime/host-gateway.sock"
+  },
+  "mutable_files": [
+    "docs/harness/g3-successor-contract.json"
+  ],
+  "verification_only_files": [
+    "tests/test_g3_successor_contract.py"
+  ],
+  "permission_contract_sha256": "0f93d5e104a2c887a04a9163cd8d98a2f3c5cb7598aff95edbd504410f2f7e68",
+  "plan_sha256": "ecb4e3e1a7f5cb6fa5d2ed058a94e6bbac250d5fc78db0a6dee66fe77203fbe7",
+  "requirements_sha256": "b7115bc0cc8a9d9af82dab543cc89000497ea41592497454cf2da8729411b975",
+  "expected_branch": "main",
+  "expected_head": "2c97006583c90dad35c80ecc42e516cc759cf977",
+  "canonical_digest_policy": {
+    "algorithm": "SHA-256",
+    "serialization": "sorted-key compact UTF-8 JSON",
+    "self_field_excluded": true
+  },
+  "source_anchor_policy": {
+    "artifact_must_be_child_of_expected_head": true,
+    "working_tree_clean_before_issue": true,
+    "source_head_drift": "FAIL_CLOSED"
+  },
+  "runtime_release_binding_policy": {
+    "status": "REQUIRED_BEFORE_ISSUE",
+    "runtime_version_id": null,
+    "runtime_manifest_sha256": null,
+    "release_id": null,
+    "release_digest": null,
+    "source_head_must_match": true,
+    "placeholder_values_forbidden": true,
+    "historical_g2_release_reuse": false
+  },
+  "owner_authority_contract": {
+    "decisions": [
+      "APPROVE",
+      "REJECT"
+    ],
+    "owner_actor_id_required": true,
+    "origin_binding": "exact-approved-staging-origin",
+    "user_verification": "required",
+    "ceremony_id_required": true,
+    "challenge_single_use": true,
+    "rejection_does_not_activate": true
+  },
+  "identity_binding_contract": {
+    "required_fields": [
+      "project_id",
+      "gate_id",
+      "plan_sha256",
+      "source_head",
+      "approval_id",
+      "activation_id",
+      "jti",
+      "replay_nonce",
+      "runtime_version_id",
+      "release_digest"
+    ],
+    "canonical_binding": "ALL_FIELDS_EXACT",
+    "mismatch_policy": "FAIL_CLOSED"
+  },
+  "canonical_issuer_contract": {
+    "schema_version": "orchestration.g3-canonical-issuer-policy.v1",
+    "official_issue_allowed": true,
+    "official_pass_allowed": true,
+    "scope": "isolated-staging-only",
+    "issuer_role": "canonical-issuer-staging",
+    "requires_owner_issue_authorization": true,
+    "requires_protected_independent_reviewer": true,
+    "requires_fresh_project_readiness": true,
+    "requires_kms_attestation": true,
+    "production_resource_change_allowed": false,
+    "runtime_current_switch_allowed": false,
+    "full_plan_execution_allowed": false,
+    "service_restart_allowed": false,
+    "staging_d1_write_allowed": false
+  },
+  "d1_contract": {
+    "database_scope": "isolated-staging-fixture-only",
+    "approval_record_unique_key": [
+      "project_id",
+      "gate_id",
+      "approval_id"
+    ],
+    "jti_unique_constraint": true,
+    "cas_fields": [
+      "state_version",
+      "expected_version",
+      "next_version"
+    ],
+    "write_conflict_policy": "CAS_FAIL_CLOSED",
+    "revocation_ledger_append_only": true,
+    "revocation_event_fields": [
+      "event_hash",
+      "previous_event_hash",
+      "revocation_version",
+      "revoked_at",
+      "reason"
+    ],
+    "update_delete_allowed": false,
+    "readback_requires_current_revocation_state": true
+  },
+  "jws_contract": {
+    "algorithm": "EdDSA",
+    "key_custody": "KMS_ONLY",
+    "provider": "GOOGLE_CLOUD_KMS",
+    "environment": "isolated-staging",
+    "key_version": "projects/ai-office-family-access/locations/global/keyRings/ai-office-staging/cryptoKeys/g3-signing/cryptoKeyVersions/1",
+    "key_id_pin": "gcp-kms-ed25519-staging-v1",
+    "public_jwk_sha256": "11af3008f396352872f4c979a09e9a2428b13fed6355fe03f8dd95914550dce8",
+    "attestation_message": "canonical_release_digest_only",
+    "release_digest_binding": "exact",
+    "key_id_pin_required": true,
+    "jti_required": true,
+    "replay_nonce_required": true,
+    "issued_at_required": true,
+    "expiration_required": true,
+    "issuer_required": true,
+    "audience_required": true,
+    "private_key_in_harness_or_evidence": false,
+    "signature_checked_before_readback_acceptance": true
+  },
+  "continuation_lease_contract": {
+    "schema_version": "orchestration.full-plan-continuation-lease.v1",
+    "enabled": true,
+    "scope": "isolated-staging-g3-continuation-only",
+    "execution_mode": "FULL_PLAN_HYBRID",
+    "gate_by_gate": false,
+    "issuer_role": "cf-continuation-issuer-staging",
+    "audience": "ai-office-harness",
+    "official_issue_allowed": false,
+    "official_pass_allowed": false,
+    "resume_execution_allowed": false,
+    "d1_write_allowed": false,
+    "required_binding_fields": [
+      "project_id",
+      "gate_id",
+      "plan_sha256",
+      "source_head",
+      "runtime_version_id",
+      "release_digest",
+      "approval_id"
+    ],
+    "replay_identity_fields": [
+      "lease_id",
+      "jti",
+      "replay_nonce",
+      "issued_at",
+      "expires_at",
+      "checkpoint_state_sha256",
+      "checkpoint_epoch"
+    ],
+    "lease_window": {
+      "max_lease_seconds": 86400,
+      "max_total_seconds": 604800,
+      "max_renewals": 6
+    },
+    "allowed_decisions": [
+      "AUTO_RENEW_ELIGIBLE",
+      "DELEGATED_APPROVAL_GRANTED"
+    ],
+    "signing": {
+      "algorithm": "EdDSA",
+      "key_custody": "KMS_ONLY",
+      "provider": "GOOGLE_CLOUD_KMS",
+      "key_version": "projects/ai-office-family-access/locations/global/keyRings/ai-office-staging/cryptoKeys/g3-signing/cryptoKeyVersions/1",
+      "key_id_pin": "gcp-kms-ed25519-staging-v1",
+      "message_binding": "canonical_lease_record_with_empty_signature",
+      "release_digest_binding": "exact",
+      "private_key_export": false,
+      "access_token_export": false
+    },
+    "prohibited_actions": [
+      "official_g3_issue",
+      "official_g3_pass",
+      "full_plan_execution",
+      "runtime_current_switch",
+      "production_resource_change",
+      "service_restart",
+      "staging_d1_mutation"
+    ]
+  },
+  "verification_commands": [
+    "python3 -m unittest -v tests.test_g3_successor_contract",
+    "git diff --check"
+  ],
+  "future_implementation_verification": {
+    "required_before_issue": true,
+    "scope": "Harness-owned WebAuthn/D1/JWS runtime and negative tests",
+    "command_must_be_resolved_before_issue": true,
+    "no_definition_phase_execution": true
+  },
+  "completion_conditions": [
+    "G3 contract is bound to the new canonical plan and REQ-003 digest",
+    "Approve and reject owner ceremony evidence are both present and distinct",
+    "D1 uniqueness, CAS fail-closed, append-only revocation, and current readback are verified",
+    "JWS EdDSA signature, KMS custody, key pin, issuer/audience, JTI, replay nonce, and expiry are verified",
+    "Wrong owner, wrong origin, duplicate, stale CAS, expired, revoked, and replay cases fail closed",
+    "Fresh isolated runtime/release binding and independent Reviewer evidence are present before ISSUE",
+    "No production, runtime-current, service restart, Full Plan, or live operation is performed"
+  ],
+  "reviewer_evidence_requirements": [
+    "Fresh source/branch/HEAD/plan/requirements/permission digest report",
+    "One APPROVE and one REJECT readback receipt with distinct ceremony IDs",
+    "D1 uniqueness/CAS/append-only revocation evidence with rows_written and changed_db status",
+    "JWS verification evidence without private key, token, or production credential",
+    "Negative tests for wrong owner/origin, duplicate, stale CAS, expired, revoked, and replay",
+    "Fresh runtime/release manifest bound to the actual G3 artifact",
+    "Independent Reviewer PASS with evidence bundle SHA-256",
+    "Explicit action boundary proving no production or operational effect"
+  ],
+  "prohibited_actions": [
+    "live WebAuthn ceremony",
+    "staging D1 mutation",
+    "KMS signing of any message other than canonical release_digest or an isolated-staging continuation lease payload authorized by continuation_lease_contract",
+    "KMS private key export",
+    "KMS access-token export",
+    "production KMS or key change",
+    "production Worker, DB, or key change",
+    "runtime-current switch",
+    "service restart",
+    "Full Plan execution",
+    "Git push"
+  ],
+  "contract_digest_sha256": "b854c81ce94f5aabb415cbf4d511c3cf62dc583dbdbe1f51d7319e82f9468d5b"
+}
