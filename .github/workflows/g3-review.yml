@@ -11,11 +11,6 @@ on:
         description: Run ID that produced the evidence artifact
         required: true
         type: string
-      evidence_root:
-        description: Directory where the evidence artifact is unpacked
-        required: true
-        default: _workspace/g3-evidence
-        type: string
       g3_path:
         description: Path to the G3 successor contract inside the checkout
         required: true
@@ -57,6 +52,8 @@ on:
 permissions:
   contents: read
   actions: read
+  id-token: write
+  attestations: write
 
 jobs:
   independent-review:
@@ -64,18 +61,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout reviewer source
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
 
       - name: Download pre-collected evidence
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53
         with:
           name: ${{ inputs.evidence_artifact_name }}
-          path: ${{ inputs.evidence_root }}
+          path: _workspace/g3-evidence
           run-id: ${{ inputs.evidence_artifact_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.12'
 
@@ -88,31 +85,74 @@ jobs:
           echo "WORKFLOW_SHA256=$WORKFLOW_SHA256" >> "$GITHUB_ENV"
 
       - name: Run independent read-only review
+        id: run-review
+        env:
+          INPUT_G3_PATH: ${{ inputs.g3_path }}
+          INPUT_READBACK_BUNDLE_PATH: ${{ inputs.readback_bundle_path }}
+          INPUT_RUNTIME_RELEASE_PATH: ${{ inputs.runtime_release_path }}
+          INPUT_REVIEWER_ID: ${{ inputs.reviewer_id }}
+          INPUT_IMPLEMENTATION_ACTOR_ID: ${{ inputs.implementation_actor_id }}
+          INPUT_ISSUER_ACTOR_ID: ${{ inputs.issuer_actor_id }}
+          INPUT_EVIDENCE_BUNDLE_SHA256: ${{ inputs.evidence_bundle_sha256 }}
+          INPUT_REVIEWED_AT: ${{ inputs.reviewed_at }}
+          INPUT_EXPIRES_AT: ${{ inputs.expires_at }}
+          INPUT_REPOSITORY: ${{ github.repository }}
+          INPUT_REVIEW_RUN_ID: github-${{ github.run_id }}
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p _workspace/reviewer-output
           python3 reviewer.py \
-            --g3 "${{ inputs.g3_path }}" \
-            --readback-bundle "${{ inputs.readback_bundle_path }}" \
-            --runtime-release "${{ inputs.runtime_release_path }}" \
-            --reviewer-id "${{ inputs.reviewer_id }}" \
-            --implementation-actor-id "${{ inputs.implementation_actor_id }}" \
-            --issuer-actor-id "${{ inputs.issuer_actor_id }}" \
-            --repository "https://github.com/${{ github.repository }}" \
+            --g3 "$INPUT_G3_PATH" \
+            --readback-bundle "$INPUT_READBACK_BUNDLE_PATH" \
+            --runtime-release "$INPUT_RUNTIME_RELEASE_PATH" \
+            --reviewer-id "$INPUT_REVIEWER_ID" \
+            --implementation-actor-id "$INPUT_IMPLEMENTATION_ACTOR_ID" \
+            --issuer-actor-id "$INPUT_ISSUER_ACTOR_ID" \
+            --repository "https://github.com/$INPUT_REPOSITORY" \
             --workflow-path ".github/workflows/g3-review.yml" \
             --workflow-source-sha256 "$WORKFLOW_SHA256" \
-            --review-run-id "github-${{ github.run_id }}" \
-            --evidence-bundle-sha256 "${{ inputs.evidence_bundle_sha256 }}" \
-            --reviewed-at "${{ inputs.reviewed_at }}" \
-            --expires-at "${{ inputs.expires_at }}" \
+            --review-run-id "$INPUT_REVIEW_RUN_ID" \
+            --evidence-bundle-sha256 "$INPUT_EVIDENCE_BUNDLE_SHA256" \
+            --reviewed-at "$INPUT_REVIEWED_AT" \
+            --expires-at "$INPUT_EXPIRES_AT" \
             --now "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
             --output _workspace/reviewer-output/independent-g3-review.json
 
-      - name: Upload review record only
+      - name: Attest independent review record
+        id: attest-review
+        if: always() && steps.run-review.outcome != 'skipped' && hashFiles('_workspace/reviewer-output/independent-g3-review.json') != ''
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: _workspace/reviewer-output/independent-g3-review.json
+          push-to-registry: false
+          show-summary: false
+
+      - name: Stage the signed bundle
+        if: always() && steps.attest-review.outcome == 'success'
+        shell: bash
+        env:
+          BUNDLE_PATH: ${{ steps.attest-review.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          test -s "$BUNDLE_PATH"
+          install -m 0600 "$BUNDLE_PATH" _workspace/reviewer-output/independent-g3-review.attestation.json
+
+      - name: Require complete review bundle
+        id: require-review-bundle
         if: always()
-        uses: actions/upload-artifact@v4
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s _workspace/reviewer-output/independent-g3-review.json
+          test -s _workspace/reviewer-output/independent-g3-review.attestation.json
+
+      - name: Upload review record and attestation bundle
+        if: always() && steps.require-review-bundle.outcome == 'success'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: independent-g3-review-${{ github.run_id }}
-          path: _workspace/reviewer-output/independent-g3-review.json
+          path: |
+            _workspace/reviewer-output/independent-g3-review.json
+            _workspace/reviewer-output/independent-g3-review.attestation.json
           if-no-files-found: error
