@@ -54,7 +54,6 @@ permissions:
   actions: read
   id-token: write
   attestations: write
-  artifact-metadata: write
 
 jobs:
   independent-review:
@@ -86,6 +85,7 @@ jobs:
           echo "WORKFLOW_SHA256=$WORKFLOW_SHA256" >> "$GITHUB_ENV"
 
       - name: Run independent read-only review
+        id: run-review
         env:
           INPUT_G3_PATH: ${{ inputs.g3_path }}
           INPUT_READBACK_BUNDLE_PATH: ${{ inputs.readback_bundle_path }}
@@ -121,6 +121,7 @@ jobs:
 
       - name: Attest independent review record
         id: attest-review
+        if: always() && steps.run-review.outcome != 'skipped' && hashFiles('_workspace/reviewer-output/independent-g3-review.json') != ''
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
         with:
           subject-path: _workspace/reviewer-output/independent-g3-review.json
@@ -128,6 +129,7 @@ jobs:
           show-summary: false
 
       - name: Stage the signed bundle
+        if: always() && steps.attest-review.outcome == 'success'
         shell: bash
         env:
           BUNDLE_PATH: ${{ steps.attest-review.outputs.bundle-path }}
@@ -136,8 +138,17 @@ jobs:
           test -s "$BUNDLE_PATH"
           install -m 0600 "$BUNDLE_PATH" _workspace/reviewer-output/independent-g3-review.attestation.json
 
-      - name: Upload review record and attestation bundle
+      - name: Require complete review bundle
+        id: require-review-bundle
         if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s _workspace/reviewer-output/independent-g3-review.json
+          test -s _workspace/reviewer-output/independent-g3-review.attestation.json
+
+      - name: Upload review record and attestation bundle
+        if: always() && steps.require-review-bundle.outcome == 'success'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: independent-g3-review-${{ github.run_id }}

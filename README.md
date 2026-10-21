@@ -38,9 +38,17 @@ The process exits `0` only for `PASS` and exits `10` for a fail-closed
 
 `.github/workflows/g3-review.yml` is a manual `workflow_dispatch` workflow.
 The evidence artifact must already exist in this reviewer repository. The
-workflow downloads that artifact, runs the local reviewer, and uploads only
-the generated review record. It grants `contents: read` and `actions: read`;
-it has no contents-write, issue-write, deployment, KMS, WebAuthn, or D1 step.
+workflow downloads that artifact, runs the local reviewer, creates a GitHub
+artifact attestation for the generated review record, and uploads the review
+record together with its attestation bundle. A fail-closed `NO-GO` remains a
+failed workflow result, but its record and attestation are still preserved
+when both are available. The workflow skips artifact upload unless both
+files exist.
+
+The workflow grants `contents: read`, `actions: read`, `id-token: write`, and
+`attestations: write` for GitHub artifact attestation. It does not grant
+`artifact-metadata` or contents-write, issue-write, or deployment permissions,
+and it has no KMS, WebAuthn, or D1 step.
 
 Before treating the repository as an independent protected reviewer, the
 repository owner must make the repository private or otherwise protected and
