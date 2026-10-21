@@ -1,0 +1,118 @@
+name: Independent G3 Evidence Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      evidence_artifact_name:
+        description: Existing evidence artifact in this reviewer repository
+        required: true
+        type: string
+      evidence_artifact_run_id:
+        description: Run ID that produced the evidence artifact
+        required: true
+        type: string
+      evidence_root:
+        description: Directory where the evidence artifact is unpacked
+        required: true
+        default: _workspace/g3-evidence
+        type: string
+      g3_path:
+        description: Path to the G3 successor contract inside the checkout
+        required: true
+        type: string
+      readback_bundle_path:
+        description: Path to the preflight readback bundle
+        required: true
+        type: string
+      runtime_release_path:
+        description: Path to the fresh runtime/release mapping
+        required: true
+        type: string
+      reviewer_id:
+        description: Independent Reviewer identity
+        required: true
+        default: independent-reviewer-github-actions
+        type: string
+      implementation_actor_id:
+        description: Implementation actor identity
+        required: true
+        type: string
+      issuer_actor_id:
+        description: Canonical issuer actor identity
+        required: true
+        type: string
+      evidence_bundle_sha256:
+        description: SHA-256 of the evidence bundle under review
+        required: true
+        type: string
+      reviewed_at:
+        description: Review start time in UTC, RFC3339 with Z
+        required: true
+        type: string
+      expires_at:
+        description: Review expiry in UTC, no more than 24 hours after reviewed_at
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  independent-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout reviewer source
+        uses: actions/checkout@v4
+
+      - name: Download pre-collected evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.evidence_artifact_name }}
+          path: ${{ inputs.evidence_root }}
+          run-id: ${{ inputs.evidence_artifact_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Pin workflow source digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .github/workflows/g3-review.yml
+          WORKFLOW_SHA256="$(sha256sum .github/workflows/g3-review.yml | awk '{print $1}')"
+          echo "WORKFLOW_SHA256=$WORKFLOW_SHA256" >> "$GITHUB_ENV"
+
+      - name: Run independent read-only review
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _workspace/reviewer-output
+          python3 reviewer.py \
+            --g3 "${{ inputs.g3_path }}" \
+            --readback-bundle "${{ inputs.readback_bundle_path }}" \
+            --runtime-release "${{ inputs.runtime_release_path }}" \
+            --reviewer-id "${{ inputs.reviewer_id }}" \
+            --implementation-actor-id "${{ inputs.implementation_actor_id }}" \
+            --issuer-actor-id "${{ inputs.issuer_actor_id }}" \
+            --repository "https://github.com/${{ github.repository }}" \
+            --workflow-path ".github/workflows/g3-review.yml" \
+            --workflow-source-sha256 "$WORKFLOW_SHA256" \
+            --review-run-id "github-${{ github.run_id }}" \
+            --evidence-bundle-sha256 "${{ inputs.evidence_bundle_sha256 }}" \
+            --reviewed-at "${{ inputs.reviewed_at }}" \
+            --expires-at "${{ inputs.expires_at }}" \
+            --now "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+            --output _workspace/reviewer-output/independent-g3-review.json
+
+      - name: Upload review record only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-g3-review-${{ github.run_id }}
+          path: _workspace/reviewer-output/independent-g3-review.json
+          if-no-files-found: error
